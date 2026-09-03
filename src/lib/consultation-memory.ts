@@ -1,0 +1,26 @@
+export type ConsultationData = {
+  gender: string;
+  age: string;
+  height: string;
+  weight: string;
+  diseases: string[];
+  bodyParts: string[];
+};
+
+let currentConsultation: ConsultationData | null = null;
+
+export function saveConsultation(data: ConsultationData) {
+  currentConsultation = {
+    ...data,
+    diseases: [...data.diseases],
+    bodyParts: [...data.bodyParts],
+  };
+}
+
+export function getConsultation() {
+  return currentConsultation;
+}
+
+export function clearConsultation() {
+  currentConsultation = null;
+}
