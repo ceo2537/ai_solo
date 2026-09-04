@@ -9,13 +9,12 @@ export const Route = createFileRoute("/")({
       { title: "영양나침반" },
       {
         name: "description",
-        content:
-          "성별, 나이, 키, 몸무게, 질환과 관심 신체 부위를 바탕으로 영양성분과 생활습관 정보를 정리해 드립니다.",
+        content: "간단히 묻고 자세히 알아가세요.",
       },
       { property: "og:title", content: "영양나침반" },
       {
         property: "og:description",
-        content: "내 건강에 맞는 영양 방향을, 근거와 함께",
+        content: "간단히 묻고 자세히 알아가세요.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -26,31 +25,40 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   return (
-    <main className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex h-[72px] max-w-[1120px] items-center px-5 sm:px-8">
-          <span className="text-xl font-extrabold text-foreground">영양나침반</span>
-        </div>
-      </header>
-      <section className="mx-auto flex min-h-[calc(100vh-72px)] max-w-[1120px] flex-col justify-center px-5 py-14 sm:px-8 lg:py-20">
-        <div className="min-w-0">
-          <h1 className="max-w-[680px] text-[36px] font-extrabold leading-[1.2] text-foreground sm:text-[39px] lg:text-[52px]">
-            내 건강에 맞는
-            <br />영양 방향을, 근거와 함께
+    <main className="min-h-screen bg-[#ffffff]">
+      <section className="mx-auto flex min-h-screen max-w-[1120px] flex-col justify-center px-5 py-12 sm:px-8 sm:py-16">
+        <div className="mx-auto flex w-full max-w-[720px] min-w-0 flex-col items-center">
+          <h1 className="text-center text-[34px] font-extrabold leading-[1.2] text-[#111827] sm:text-[39px]">
+            내 손안에 영양정보
           </h1>
-          <p className="mt-7 max-w-[640px] text-base leading-[1.7] text-muted-foreground sm:text-xl">
-            성별, 나이, 키, 몸무게, 질환과 관심 신체 부위를 바탕으로 영양성분과 생활습관 정보를 정리해 드립니다.
+          <p className="mt-5 text-center text-lg leading-[1.6] text-[#6b7280] sm:text-xl">
+            간단히 묻고 자세히 알아보세요.
           </p>
-          <Button asChild size="lg" className="mt-9 w-full sm:w-auto sm:min-w-60">
+          <div className="mt-5 h-px w-12 bg-[#7ed0b8]" aria-hidden="true" />
+
+          <div className="mt-10 w-full rounded-2xl border border-[#e6e8ec] bg-[#f6f7f9] p-6 sm:p-8">
+            <h2 className="text-[22px] font-extrabold leading-[1.3] text-[#1f6f8b] sm:text-[25px]">
+              비의료정보 안내
+            </h2>
+            <p className="mt-4 text-base leading-[1.6] text-[#111827]">
+              본 서비스는 질병의 진단, 치료, 예방, 정확한 복용량, 특정 제품 추천 등 의료적 판단을 대신하지 않습니다.
+              건강 관련 결정은 반드시 의료 전문가와 상담하시기 바랍니다.
+            </p>
+          </div>
+
+          <p className="mt-6 text-center text-sm leading-[1.6] text-[#6b7280] sm:text-base">
+            상담내용은 저장되지 않고 일회성으로 처리됩니다.
+          </p>
+
+          <Button
+            asChild
+            size="lg"
+            className="mt-8 w-full rounded-2xl bg-[#7ed0b8] px-5 py-3 text-[20px] text-[#111827] hover:bg-[#6fc2aa] focus-visible:ring-[#1f6f8b] sm:text-[24px]"
+          >
             <Link to="/questionnaire"><Compass />상담 시작</Link>
           </Button>
-          <div className="mt-8 space-y-3 text-[13px] leading-relaxed text-muted-foreground sm:text-sm">
-            <p className="flex items-start gap-3">AI가 생성한 비의료 건강정보입니다.</p>
-            <p className="flex items-start gap-3">입력한 내용은 외부 AI에 일회성으로 전달되며 상담 종료 후 남지 않습니다.</p>
-          </div>
         </div>
       </section>
     </main>
   );
 }
-
