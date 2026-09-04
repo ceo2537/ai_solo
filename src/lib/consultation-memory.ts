@@ -1,7 +1,6 @@
 export type ConsultationData = {
   gender: string;
   age: string;
-  birthDate: string;
   height: string;
   weight: string;
   diseases: string[];
