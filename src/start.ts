@@ -1,7 +1,7 @@
 import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
-import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
+import { attachSupabaseAuthSafely } from "@/lib/supabase-auth-attacher";
 
 /** 규격 밖 요청 본문(역직렬화 형식 오류)을 식별한다. 프레임워크 이름은 노출하지 않는다. */
 function isMalformedPayloadError(error: unknown): boolean {
@@ -139,6 +139,6 @@ const securityHeadersMiddleware = createMiddleware().server(async ({ request, ne
 
 
 export const startInstance = createStart(() => ({
-  functionMiddleware: [attachSupabaseAuth],
+  functionMiddleware: [attachSupabaseAuthSafely],
   requestMiddleware: [securityHeadersMiddleware, errorMiddleware, csrfMiddleware],
 }));

@@ -172,6 +172,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_admin_login_event: {
+        Args: {
+          _admin_user_id: string
+          _failure_reason: string
+          _success: boolean
+        }
+        Returns: undefined
+      }
       rate_limit_hit: {
         Args: {
           _block_seconds?: number

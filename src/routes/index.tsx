@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Compass } from "lucide-react";
 
+import logoAsset from "@/assets/logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -26,6 +27,11 @@ export const Route = createFileRoute("/")({
 function Home() {
   return (
     <main className="min-h-screen bg-[#ffffff]">
+      <img
+        src={logoAsset.url}
+        alt="영양나침반 로고"
+        className="fixed top-4 left-4 z-50 h-12 w-12 object-contain sm:h-14 sm:w-14"
+      />
       <Link
         to="/admin/login"
         aria-label="관리자 로그인"
@@ -34,12 +40,12 @@ function Home() {
       <section className="mx-auto flex min-h-screen max-w-[1120px] flex-col justify-center px-5 py-12 sm:px-8 sm:py-16">
         <div className="mx-auto flex w-full max-w-[720px] min-w-0 flex-col items-center">
           <h1 className="text-center text-[34px] font-extrabold leading-[1.2] text-[#111827] sm:text-[39px]">
-            내 손안에 영양정보
+            영양나침반
           </h1>
           <p className="mt-5 text-center text-lg leading-[1.6] text-[#6b7280] sm:text-xl">
-            간단히 묻고 자세히 알아보세요.
+            나만의 AI맞춤 영양상담을 받아보세요.
           </p>
-          <div className="mt-5 h-px w-12 bg-[#7ed0b8]" aria-hidden="true" />
+          
 
           <div className="mt-10 w-full rounded-2xl border border-[#e6e8ec] bg-[#f6f7f9] p-6 sm:p-8">
             <h2 className="text-[22px] font-extrabold leading-[1.3] text-[#1f6f8b] sm:text-[25px]">

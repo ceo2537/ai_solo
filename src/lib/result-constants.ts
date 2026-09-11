@@ -31,6 +31,79 @@ export const SOURCES = {
     label: "NEI 연령관련 황반변성 정보",
     url: "https://www.nei.nih.gov/eye-health-information/eye-conditions-and-diseases/age-related-macular-degeneration",
   },
+  neiAmdSupplements: {
+    label: "NEI 황반변성 영양보충 관련 정보(AREDS2)",
+    url: "https://www.nei.nih.gov/eye-health-information/eye-conditions-and-diseases/age-related-macular-degeneration/nutritional-supplements-age-related-macular-degeneration",
+  },
+  nihB12: {
+    label: "NIH ODS 비타민 B12 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/VitaminB12-HealthProfessional/",
+  },
+  nihFolate: {
+    label: "NIH ODS 엽산 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/Folate-HealthProfessional/",
+  },
+  nihOmega3: {
+    label: "NIH ODS 오메가3 지방산 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/",
+  },
+  nihIodine: {
+    label: "NIH ODS 요오드 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/Iodine-HealthProfessional/",
+  },
+  nihSelenium: {
+    label: "NIH ODS 셀레늄 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/Selenium-HealthProfessional/",
+  },
+  nihPotassium: {
+    label: "NIH ODS 칼륨 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/",
+  },
+  ahaFishOmega3: {
+    label: "American Heart Association 생선과 오메가3 지방산 정보",
+    url: "https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/fats/fish-and-omega-3-fatty-acids",
+  },
+  niddkCirrhosisDiet: {
+    label: "NIDDK 간경변 식사·영양 정보",
+    url: "https://www.niddk.nih.gov/health-information/liver-disease/cirrhosis/eating-diet-nutrition",
+  },
+  nihCholine: {
+    label: "NIH ODS 콜린 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/Choline-HealthProfessional/",
+  },
+  niddkConstipation: {
+    label: "NIDDK 변비 식사·영양 정보",
+    url: "https://www.niddk.nih.gov/health-information/digestive-diseases/constipation/eating-diet-nutrition",
+  },
+  nihProbiotics: {
+    label: "NIH ODS 프로바이오틱스 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/Probiotics-HealthProfessional/",
+  },
+  niddkCkdDiet: {
+    label: "NIDDK 만성콩팥병 성인 식사 정보",
+    url: "https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/healthy-eating-adults-chronic-kidney-disease",
+  },
+  nihCalcium: {
+    label: "NIH ODS 칼슘 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/",
+  },
+  nihVitaminD: {
+    label: "NIH ODS 비타민 D (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/",
+  },
+  nihBiotin: {
+    label: "NIH ODS 비오틴 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/Biotin-HealthProfessional/",
+  },
+  nihImmune: {
+    label: "NIH ODS 면역 기능과 영양 (전문가용)",
+    url: "https://ods.od.nih.gov/factsheets/ImmuneFunction-HealthProfessional/",
+  },
+  nccihMagnesium: {
+    label: "NCCIH 마그네슘과 수면 관련 정보",
+    url: "https://www.nccih.nih.gov/health/in-the-news-magnesium-supplements-for-sleep-disorders",
+  },
+
   diabetes: {
     label: "대한당뇨병학회 가이드",
     url: "https://diabetes.or.kr/bbs/?code=guide",
@@ -152,15 +225,104 @@ export type BodyPartInfo = {
   role: string;
   sources: SourceRef[];
   symptoms?: string[];
+  /** 검사 정보·진단 확인이 필요해 확정하지 않는 안내(판단 보류 문구와 함께 표시) */
+  cautions?: string[];
 };
 
-/** 관심 건강 분야별 안내. 눈만 PRD에 확정된 별도 근거를 갖는다. */
+/** 관심 건강 분야별 승인 기준. 링크는 등록된 공식 근거만 사용한다. */
 export const BODY_PART_INFO: Record<string, BodyPartInfo> = {
+  "뇌·기억력": {
+    goals: ["비타민 B12 섭취 상태", "엽산 섭취 상태", "오메가3 섭취 상태"],
+    role: "비타민 B12와 엽산은 혈액 형성과 신경계 기능에, 오메가3 지방산은 세포막 구성에 관여합니다. 기억력 개선 효과가 확정된 것은 아닙니다.",
+    sources: [SOURCES.kdri, SOURCES.nihB12, SOURCES.nihFolate, SOURCES.nihOmega3],
+    symptoms: ["기억력이나 인지 기능 변화가 빠르게 이어지면 의료 전문가와 상의해 주세요."],
+  },
   눈: {
-    goals: ["비타민 A", "균형 잡힌 식사 구성"],
+    goals: ["비타민 A 섭취 상태", "균형 잡힌 식사 구성"],
     role: "비타민 A는 정상적인 시각 기능과 상피 조직의 유지에 관여하는 영양소입니다.",
-    sources: [SOURCES.kdri, SOURCES.nihVitaminAPro, SOURCES.nihVitaminAConsumer, SOURCES.nei],
+    sources: [
+      SOURCES.kdri,
+      SOURCES.nihVitaminAPro,
+      SOURCES.nihVitaminAConsumer,
+      SOURCES.nei,
+      SOURCES.neiAmdSupplements,
+    ],
     symptoms: ["시야가 휘어 보이거나 가운데가 흐리게 보이는 변화가 있으면 안과 상담이 필요합니다."],
+    cautions: ["루테인·지아잔틴이 포함된 AREDS2 조합은 황반변성 진단과 진행 단계가 확인된 경우에만 해당합니다."],
+  },
+  "갑상선·목": {
+    goals: ["요오드 섭취 상태", "셀레늄 섭취 상태"],
+    role: "요오드는 갑상선호르몬 생성에, 셀레늄은 항산화 효소 구성에 관여하는 무기질입니다.",
+    sources: [SOURCES.kdri, SOURCES.nihIodine, SOURCES.nihSelenium],
+    symptoms: ["목 앞쪽이 붓거나 체중·맥박 변화가 이어지면 의료 전문가와 상의해 주세요."],
+    cautions: ["갑상선 질환, 관련 약 사용, 과다 섭취 가능성이 있으면 요오드·셀레늄 증감을 확정할 수 없습니다."],
+  },
+  심혈관: {
+    goals: ["나트륨 섭취 상태", "칼륨 섭취 상태", "오메가3 섭취 상태"],
+    role: "나트륨과 칼륨은 체액·전해질 균형에, 오메가3 지방산은 지질 대사에 관여합니다.",
+    sources: [SOURCES.kdri, SOURCES.nihPotassium, SOURCES.ahaFishOmega3],
+    symptoms: ["가슴 통증, 호흡곤란, 심한 두근거림이 있으면 즉시 의료기관을 찾아 주세요."],
+    cautions: ["오메가3는 음식으로 섭취하는 방법을 먼저 살펴보세요."],
+  },
+  간: {
+    goals: ["총에너지", "단백질 섭취 상태", "비타민·무기질 부족 가능성", "나트륨 섭취 상태", "콜린 섭취 상태"],
+    role: "간은 영양소 대사와 저장에 관여하며, 열량·단백질·미량영양소가 부족해지지 않도록 살피는 것이 기본입니다.",
+    sources: [SOURCES.kdri, SOURCES.niddkCirrhosisDiet, SOURCES.nihCholine],
+    symptoms: ["황달, 복부 팽만, 심한 피로가 이어지면 의료 전문가와 상의해 주세요."],
+    cautions: ["간 질환이 있으면 특정 성분이나 허브 섭취를 임의로 늘리지 마세요."],
+  },
+  "위·장": {
+    goals: ["식이섬유 섭취 상태", "수분 섭취 상태"],
+    role: "식이섬유와 수분은 장 통과 시간과 배변 형태에 관여합니다.",
+    sources: [SOURCES.kdri, SOURCES.niddkConstipation, SOURCES.nihProbiotics],
+    symptoms: ["혈변, 심한 복통, 원인 모를 체중 감소가 있으면 의료 전문가와 상의해 주세요."],
+    cautions: ["유산균(프로바이오틱스)은 균 종류와 대상 증상이 확인될 때만 안내할 수 있습니다."],
+  },
+  "신장·요로": {
+    goals: ["나트륨 섭취 상태", "칼륨 섭취 상태", "인 섭취 상태", "단백질 섭취 상태", "수분 섭취 상태"],
+    role: "신장은 전해질과 노폐물, 체액량 조절에 관여하며 섭취 목표는 신장 기능과 검사 결과에 따라 달라집니다.",
+    sources: [SOURCES.kdri, SOURCES.niddkCkdDiet],
+    symptoms: ["부종, 소변량 변화, 혈뇨가 있으면 의료 전문가와 상의해 주세요."],
+    cautions: ["신장 기능과 검사 결과가 없으면 나트륨·칼륨·인·단백질·수분의 증감이나 제한량을 확정할 수 없습니다."],
+  },
+  "뼈·관절": {
+    goals: ["칼슘 섭취 상태", "비타민 D 섭취 상태"],
+    role: "칼슘과 비타민 D는 뼈의 형성과 유지에 관여하는 영양소입니다.",
+    sources: [SOURCES.kdri, SOURCES.nihCalcium, SOURCES.nihVitaminD],
+    symptoms: ["가벼운 충격에도 골절이 생기거나 통증이 이어지면 의료 전문가와 상의해 주세요."],
+  },
+  "피부·모발": {
+    goals: ["단백질 섭취 상태"],
+    role: "단백질은 피부와 모발을 구성하는 기본 영양소입니다.",
+    sources: [SOURCES.kdri, SOURCES.nihBiotin],
+    symptoms: ["피부 발진이나 탈모가 갑자기 심해지면 의료 전문가와 상의해 주세요."],
+    cautions: ["부족이 확인되지 않은 상태에서 피부·모발 개선을 목적으로 비오틴 섭취를 권할 수 없습니다."],
+  },
+  "면역·전신": {
+    goals: [
+      "비타민 A 섭취 상태",
+      "비타민 C 섭취 상태",
+      "비타민 D 섭취 상태",
+      "비타민 E 섭취 상태",
+      "아연 섭취 상태",
+      "셀레늄 섭취 상태",
+    ],
+    role: "비타민 A·C·D·E와 아연, 셀레늄은 정상적인 면역 기능 유지에 관여합니다. 감염을 예방하거나 치료하는 것은 아닙니다.",
+    sources: [
+      SOURCES.kdri,
+      SOURCES.nihImmune,
+      SOURCES.nihVitaminAPro,
+      SOURCES.nihVitaminD,
+      SOURCES.nihSelenium,
+    ],
+    symptoms: ["고열이 이어지거나 감염이 자주 반복되면 의료 전문가와 상의해 주세요."],
+  },
+  "수면·스트레스": {
+    goals: ["마그네슘 섭취 상태", "식사 규칙성"],
+    role: "마그네슘은 근육과 신경의 정상 기능에 관여하는 무기질입니다.",
+    sources: [SOURCES.kdri, SOURCES.nccihMagnesium],
+    symptoms: ["불면이 오래 이어지거나 일상생활에 지장이 있으면 의료 전문가와 상의해 주세요."],
+    cautions: ["마그네슘의 수면 개선 효과는 확정되지 않아 자동으로 권하지 않습니다."],
   },
 };
 

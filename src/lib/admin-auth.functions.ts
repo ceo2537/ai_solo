@@ -52,16 +52,21 @@ export const adminSignIn = createServerFn({ method: "POST" })
     return { email, password };
   })
   .handler(async ({ data }): Promise<AdminSignInResult> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { requestOriginToken, hmacToken, hasHmacSecret, rateLimitPeek, rateLimitHit, rateLimitReset } =
       await import("@/lib/rate-limit.server");
 
+    // 시도 기록은 최소 권한 기록 함수로만 남긴다(서비스 역할 키에 의존하지 않는다).
     const log = async (success: boolean, adminUserId: string | null, reason: string | null) => {
-      await supabaseAdmin.from("admin_login_events").insert({
-        success,
-        admin_user_id: adminUserId,
-        failure_reason: reason,
-      });
+      try {
+        const anon = createAnonServerClient();
+        await anon.rpc("log_admin_login_event", {
+          _success: success,
+          _admin_user_id: adminUserId as unknown as string,
+          _failure_reason: reason ?? "",
+        });
+      } catch {
+        /* 기록 실패가 로그인 흐름을 막지 않는다 */
+      }
     };
 
     // HMAC 비밀값이 없으면 비가역 식별을 보장할 수 없으므로 진행하지 않는다.
@@ -137,7 +142,10 @@ export const adminSignIn = createServerFn({ method: "POST" })
       }
 
       const userId = signIn.user.id;
-      const { data: isAdmin, error: roleError } = await supabaseAdmin.rpc("has_role", {
+      // 방금 발급된 사용자 토큰으로 역할을 확인한다(서비스 역할 키에 의존하지 않는다).
+      const { createPublicServerClient } = await import("@/lib/supabase-public.server");
+      const asUser = createPublicServerClient(signIn.session.access_token);
+      const { data: isAdmin, error: roleError } = await asUser.rpc("has_role", {
         _user_id: userId,
         _role: "admin",
       });
@@ -153,7 +161,16 @@ export const adminSignIn = createServerFn({ method: "POST" })
         return failSame("not_admin");
       }
 
-      await Promise.all(buckets.map((bucket) => rateLimitReset(bucket)));
+      // 성공 시 실패 카운터 초기화(로그인한 사용자 권한으로만 허용된다).
+      await Promise.all(
+        buckets.map(async (bucket) => {
+          try {
+            await asUser.rpc("rate_limit_reset", { _bucket_key: bucket });
+          } catch {
+            await rateLimitReset(bucket);
+          }
+        }),
+      );
       await log(true, userId, null);
       return {
         ok: true,
@@ -172,8 +189,7 @@ export const adminSignIn = createServerFn({ method: "POST" })
 export const requireAdmin = createServerFn({ method: "POST" })
   .middleware([normalizeAuthErrors, requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ isAdmin: boolean }> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin.rpc("has_role", {
+    const { data, error } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
     });

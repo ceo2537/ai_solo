@@ -2,9 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
+import logoAsset from "@/assets/logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { clearConsultation, getConsultation, type ConsultationData } from "@/lib/consultation-memory";
+import { EVIDENCE_SUBTITLE, useInternalTestMode } from "@/lib/internal-test-mode";
 import { BODY_PART_INFO, DISEASE_INFO, FOOD_ROWS, SOURCES, bmiCategory, kdriAgeGroup, type FoodRow, type SourceRef } from "@/lib/result-constants";
+
 
 export const Route = createFileRoute("/result")({
   head: () => ({
@@ -28,7 +31,9 @@ const BASE_LIFESTYLE = [
 function ResultPage() {
   const navigate = useNavigate();
   const [data] = useState<ConsultationData | null>(() => getConsultation());
+  const isInternalTest = useInternalTestMode();
   if (!data) return <ExpiredResult />;
+
 
   const conditions = data.diseases.filter((item) => item !== "없음");
   const interests = data.bodyParts.filter((item) => item !== "없음");
@@ -83,7 +88,8 @@ function ResultPage() {
       <SiteHeader />
       <div className="mx-auto max-w-[960px] px-5 py-10 sm:px-8 sm:py-14">
         <h1 className="text-[31px] font-extrabold leading-[1.2] text-[#111827] sm:text-[39px]">맞춤 영양 안내</h1>
-        <p className="mt-3 text-lg font-semibold text-[#1F7A86] sm:text-base">AI가 생성한 비의료 건강정보입니다.</p>
+        <p className="mt-3 text-lg font-semibold text-[#1F7A86] sm:text-base">{isInternalTest ? EVIDENCE_SUBTITLE : "AI가 생성한 비의료 건강정보입니다."}</p>
+
         <div className="mt-2 flex flex-wrap gap-2">
           {conditions.length > 0 && <Badge>전문가 확인 필요</Badge>}
           {age <= 18 && <Badge>보호자와 의료전문가 확인이 필요합니다</Badge>}
@@ -195,7 +201,7 @@ function Section({ index, title, children }: { index: number; title: string; chi
   );
 }
 
-function SiteHeader() { return <header className="border-b border-[#e6e8ec]"><div className="mx-auto flex h-[72px] max-w-[1120px] items-center px-5 sm:px-8"><span className="text-xl font-extrabold text-[#111827]">영양나침반</span></div></header>; }
+function SiteHeader() { return <header className="border-b border-[#e6e8ec]"><div className="mx-auto flex h-[72px] max-w-[1120px] items-center px-5 sm:px-8"><Link to="/" onClick={() => clearConsultation()} className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F7A86] focus-visible:ring-offset-2"><img src={logoAsset.url} alt="영양나침반 로고" className="h-12 w-12 object-contain sm:h-14 sm:w-14" /></Link></div></header>; }
 
 function unique<T>(values: T[]) { return Array.from(new Set(values)); }
 function uniqueSources(values: SourceRef[]) { const seen = new Set<string>(); return values.filter((item) => (seen.has(item.url) ? false : (seen.add(item.url), true))); }

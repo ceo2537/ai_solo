@@ -35,6 +35,61 @@ function AdminLogin() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  /**
+   * 세션 저장소가 미리보기 브로커(비동기 postMessage)일 때는 setSession 직후에도
+   * 세션 조회가 잠깐 비어 있을 수 있으므로 짧게 재확인한다.
+   */
+  async function waitForSession(attempts = 5): Promise<boolean> {
+    for (let i = 0; i < attempts; i += 1) {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.access_token) return true;
+      } catch {
+        /* 다음 시도에서 재확인한다 */
+      }
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
+    return false;
+  }
+
+  /** 민감정보 없이 단계 코드만 남긴다(진단용). */
+  function failWithCode(code: string) {
+    console.error(`[admin-login] ${code}`);
+    setError(`${MESSAGES["server_error"]!} (코드: ${code})`);
+  }
+
+  /**
+   * 요청 자체가 실패한 경우 원인 범주만 안전한 코드로 구분한다.
+   * 원문 오류 메시지는 절대 화면에 노출하지 않는다.
+   */
+  function reportRequestFailure(error: unknown) {
+    const status =
+      error instanceof Response
+        ? error.status
+        : typeof (error as { status?: unknown })?.status === "number"
+          ? ((error as { status: number }).status)
+          : undefined;
+
+    if (status === 429) {
+      setError("로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+    if (status === 503) {
+      setError(MESSAGES["service_unavailable"]!);
+      return;
+    }
+    if (typeof status === "number") {
+      failWithCode(`E-HTTP-${status}`);
+      return;
+    }
+    const message = error instanceof Error ? error.message : "";
+    if (/network|fetch|load failed|timeout/i.test(message)) {
+      failWithCode("E-NETWORK");
+      return;
+    }
+    failWithCode("E-SIGNIN");
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -50,21 +105,37 @@ function AdminLogin() {
         setError(MESSAGES[result.reason] ?? MESSAGES["server_error"]!);
         return;
       }
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: result.accessToken,
-        refresh_token: result.refreshToken,
-      });
-      if (sessionError) {
-        setError(MESSAGES["server_error"]!);
+
+      let established = false;
+      try {
+        const { data, error: sessionError } = await supabase.auth.setSession({
+          access_token: result.accessToken,
+          refresh_token: result.refreshToken,
+        });
+        established = !sessionError && Boolean(data.session?.access_token);
+      } catch {
+        established = false;
+      }
+
+      if (!established) established = await waitForSession();
+      if (!established) {
+        failWithCode("E-SESSION");
         return;
       }
-      await navigate({ to: "/admin", replace: true });
-    } catch {
-      setError(MESSAGES["server_error"]!);
+
+      try {
+        await navigate({ to: "/admin", replace: true });
+      } catch {
+        // 라우터 이동이 실패해도 세션은 이미 설정됐으므로 전체 이동으로 복구한다.
+        window.location.replace("/admin");
+      }
+    } catch (error) {
+      reportRequestFailure(error);
     } finally {
       setPending(false);
     }
   }
+
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#ffffff] px-5 py-12">

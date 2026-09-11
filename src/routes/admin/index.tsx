@@ -67,13 +67,24 @@ function AdminDashboardPage() {
     let active = true;
     void (async () => {
       try {
-        const { data: sessionData } = await supabase.auth.getSession();
+        // 미리보기 환경의 비동기 세션 저장소는 첫 조회가 잠시 비어 있을 수 있어 짧게 재확인한다.
+        let session = null as Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"];
+        for (let i = 0; i < 5; i += 1) {
+          const { data } = await supabase.auth.getSession();
+          if (!active) return;
+          if (data.session) {
+            session = data.session;
+            break;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 200));
+        }
         if (!active) return;
-        if (!sessionData.session) {
+        if (!session) {
           await navigate({ to: "/admin/login", replace: true });
           return;
         }
-        const signedInAt = Date.parse(sessionData.session.user.last_sign_in_at ?? "");
+        const signedInAt = Date.parse(session.user.last_sign_in_at ?? "");
+
         if (Number.isFinite(signedInAt) && Date.now() - signedInAt >= ABSOLUTE_SESSION_MS) {
           await signOutAndRedirect();
           return;

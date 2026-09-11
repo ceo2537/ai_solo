@@ -65,9 +65,18 @@ const FAIL_CLOSED: RateLimitOutcome = {
   infrastructureError: true,
 };
 
+/**
+ * 제한·잠금 RPC 를 호출할 서버 클라이언트.
+ * 서비스 역할 키가 주입되지 않은 실행 환경에서도 동작하도록 공개 키 클라이언트로 대체한다.
+ * 해당 RPC 들은 SECURITY DEFINER 로 최소 권한만 부여돼 있어 보안 수준은 동일하다.
+ */
 async function admin() {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return supabaseAdmin;
+  if (process.env["SUPABASE_SERVICE_ROLE_KEY"] && process.env["SUPABASE_URL"]) {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    return supabaseAdmin;
+  }
+  const { createPublicServerClient } = await import("@/lib/supabase-public.server");
+  return createPublicServerClient();
 }
 
 /** 내부 장애 로그는 식별자·비밀값 없이 코드만 남긴다. */

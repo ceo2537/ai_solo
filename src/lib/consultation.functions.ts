@@ -5,6 +5,8 @@ import { apiError, normalizeAuthErrors } from "@/lib/api-errors";
 
 import {
   buildEvidence,
+  PENDING_EVIDENCE,
+  PENDING_LAB,
   SUPPORTED_BODY_PARTS,
   SUPPORTED_DISEASES,
 } from "@/lib/consultation-evidence";
@@ -328,11 +330,18 @@ export const generateConsultation = createServerFn({ method: "POST" })
         "당신은 한국어 비의료 건강정보 안내문을 작성하는 도우미입니다.",
         "진단, 치료, 예방 효과, 복용량, 특정 제품이나 영양제 권고를 절대 하지 마세요.",
         "제공된 승인 근거(approvedEvidence)에 없는 사실, 수치, URL을 만들어내지 마세요. 근거가 없으면 해당 내용을 생략하세요.",
+        "selected에 없는 질환이나 관심 건강 분야를 추정해 넣지 마세요.",
+        "여러 항목이 선택된 경우 승인 근거를 합쳐 적용하되 같은 성분과 같은 출처는 한 번만 쓰세요.",
+        "질환 규칙과 관심 분야 규칙이 충돌하면 질환의 안전 제한을 우선하세요.",
+        "approvedEvidence.safetyHolds와 approvedEvidence.cautions의 문장은 그대로 포함하고, 해당 성분의 증감·제한을 확정하지 마세요.",
+        `검사 정보가 필요해 확정할 수 없는 항목은 정확히 "${PENDING_LAB}" 문구로 표시하세요.`,
+        `승인 근거가 없는 항목은 새 내용을 만들지 말고 정확히 "${PENDING_EVIDENCE}" 문구로 표시하세요.`,
         "foods 배열은 approvedFoods에 있는 행만 그대로 사용하고, 기준량이나 함량이 없는 식품은 절대 넣지 마세요.",
-        "sources 배열에는 approvedEvidence.sources의 id 값만 넣으세요.",
+        "sources 배열에는 approvedEvidence.sources의 id 중 실제로 적용한 것만 넣으세요.",
         "모든 문장은 안내·정보 제공 어조의 존댓말로 쓰고, 전체 표시 문자열 합계가 2,600자를 넘지 않도록 간결하게 작성하세요.",
         "bodyAnalysis에는 BMI 계산식(체중(kg) ÷ 키(m)²)과 체격 해석만 간단히 쓰세요.",
         "medicalDisclaimer에는 이 정보가 AI가 생성한 비의료 일반 건강정보이며 진단·치료를 대신하지 않는다는 고지를 넣으세요.",
+
       ].join("\n");
 
       const payload = {

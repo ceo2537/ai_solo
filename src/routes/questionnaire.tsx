@@ -1,11 +1,14 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Check } from "lucide-react";
 import { forwardRef, useEffect, useId, useRef, useState } from "react";
 
+import logoAsset from "@/assets/logo.png.asset.json";
 import { Button } from "@/components/ui/button";
-import { saveConsultation } from "@/lib/consultation-memory";
+import { clearConsultation, saveConsultation } from "@/lib/consultation-memory";
 import { generateConsultation } from "@/lib/consultation.functions";
+import { buildInternalTestResult, useInternalTestMode } from "@/lib/internal-test-mode";
+
 
 export const Route = createFileRoute("/questionnaire")({
   head: () => ({
@@ -26,13 +29,15 @@ const BODY_PARTS = ["없음", "뇌·기억력", "눈", "갑상선·목", "심혈
 const MAX_DISEASES = 10;
 
 type Errors = { gender?: string | undefined; birthDate?: string | undefined; height?: string | undefined; weight?: string | undefined; bodyParts?: string | undefined; consentPrivacy?: string | undefined; consentSensitive?: string | undefined };
-const initialForm = { gender: "", birthDate: "2000-01-01", height: "", weight: "", diseases: [] as string[], bodyParts: [] as string[] };
+const initialForm = { gender: "", birthDate: "", height: "", weight: "", diseases: [] as string[], bodyParts: [] as string[] };
 const initialConsents = { privacy: false, sensitive: false };
 const initialExpanded = { privacy: false, sensitive: false };
 
 function Questionnaire() {
   const navigate = useNavigate();
   const requestConsultation = useServerFn(generateConsultation);
+  const internalTest = useInternalTestMode();
+
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const baseId = useId();
@@ -50,7 +55,7 @@ function Questionnaire() {
   const consentSensitiveRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const invalid = isEmptyOrNone(form.bodyParts) && isEmptyOrNone(form.diseases);
+    const invalid = isEmptyOrNone(form.bodyParts);
     if (!invalid && errors.bodyParts) {
       setErrors((prev) => ({ ...prev, bodyParts: undefined }));
     }
@@ -97,7 +102,7 @@ function Questionnaire() {
       refs[firstError]?.current?.focus();
       return;
     }
-    if (isEmptyOrNone(form.bodyParts) && isEmptyOrNone(form.diseases)) {
+    if (isEmptyOrNone(form.bodyParts)) {
       setErrors((prev) => ({ ...prev, bodyParts: "하나 이상의 관심 건강분야를 선택해 주세요" }));
       bodyPartsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       bodyPartsSectionRef.current?.focus();
@@ -112,8 +117,15 @@ function Questionnaire() {
       if (consentFirst) consentRefs[consentFirst]?.current?.focus();
       return;
     }
+    if (internalTest) {
+      // 서버 함수·외부 API·DB 기록 없이 승인된 근거 데이터만으로 결과를 구성한다.
+      saveConsultation({ gender: form.gender, age: String(age), birthDate: form.birthDate, height: form.height, weight: form.weight, diseases: form.diseases, bodyParts: form.bodyParts, ai: buildInternalTestResult({ gender: form.gender, age: age as number, height: Number(form.height), weight: Number(form.weight), diseases: form.diseases, bodyParts: form.bodyParts }) });
+      void navigate({ to: "/result" });
+      return;
+    }
     setSubmitting(true);
     void (async () => {
+
       try {
         const response = await requestConsultation({
           data: {
@@ -157,12 +169,13 @@ function Questionnaire() {
   return (
     <main className="min-h-screen bg-background">
       <header className="border-b border-border bg-background">
-        <div className="mx-auto flex h-[72px] max-w-[1120px] items-center px-5 sm:px-8"><span className="text-xl font-extrabold text-foreground">영양나침반</span></div>
+        <div className="mx-auto flex h-[72px] max-w-[1120px] items-center px-5 sm:px-8"><Link to="/" onClick={() => clearConsultation()} className="focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"><img src={logoAsset.url} alt="영양나침반 로고" className="h-12 w-12 object-contain sm:h-14 sm:w-14" /></Link></div>
       </header>
       <div className="mx-auto w-full max-w-[720px] px-4 py-10 sm:px-6 sm:py-16">
         <header className="text-center">
           <h1 className="text-[31px] font-extrabold leading-[1.2] text-foreground sm:text-[39px]">상담하실 내용을 알려주세요</h1>
           <p className="mt-3 text-lg leading-relaxed text-muted-foreground sm:text-base">입력하신 내용은 저장되지 않고 일회성으로 처리됩니다.</p>
+
         </header>
         <form onSubmit={handleSubmit} noValidate className="mt-8 rounded-2xl border border-border bg-card p-5 shadow-brand sm:p-10">
           <FormSection>
